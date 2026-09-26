@@ -1,0 +1,298 @@
+/* ============================================================
+   THEME TOKENS
+   ============================================================ */
+.card {
+  --bg:          #f4f1ea;
+  --surface:     #ffffff;
+  --ink:         #1b1a1f;
+  --ink-soft:    #5f5c66;
+  --ink-faint:   #9c98a3;
+  --accent:      #5b3df5;               /* structural violet */
+  --accent-soft: #efebff;
+  --target:      #e0522e;               /* target-word coral */
+  --target-bg:   rgba(224, 82, 46, 0.16);
+  --rule:        rgba(27, 26, 31, 0.10);
+  --shadow:      0 1px 2px rgba(30, 20, 70, 0.05), 0 12px 40px rgba(30, 20, 70, 0.08);
+  --radius:      20px;
+
+  --font-jp:    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "YuGothic",
+                "Noto Sans JP", "Noto Sans CJK JP", "Meiryo", sans-serif;
+  --font-ui:    "Inter", "Helvetica Neue", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-serif: "Charter", "Iowan Old Style", "Georgia", "Noto Serif", serif;
+
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.6;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Night mode: Anki desktop/iOS (.nightMode) and AnkiDroid (.night_mode) */
+.card.nightMode, .nightMode .card,
+.card.night_mode, .night_mode .card {
+  --bg:          #121215;
+  --surface:     #1c1c21;
+  --ink:         #f1eff5;
+  --ink-soft:    #b8b4c2;
+  --ink-faint:   #77737f;
+  --accent:      #a58cff;
+  --accent-soft: #29243d;
+  --target:      #ff8d6e;
+  --target-bg:   rgba(255, 141, 110, 0.20);
+  --rule:        rgba(255, 255, 255, 0.09);
+  --shadow:      0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.card-shell {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+.card-shell *, .card-shell *::before, .card-shell *::after { box-sizing: border-box; }
+.card-shell.front { min-height: 80vh; align-items: center; }
+.card-shell.back  { align-items: flex-start; padding-top: 28px; }
+
+.panel {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: clamp(28px, 6vw, 56px) clamp(20px, 6vw, 56px);
+  overflow: hidden;
+}
+/* thin accent line along the top edge */
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--target));
+}
+
+/* ============================================================
+   JAPANESE TEXT
+   ============================================================ */
+.jp {
+  font-family: var(--font-jp);
+  margin: 0;
+  word-break: normal;
+  line-break: strict;
+}
+
+.hero {
+  font-weight: 700;
+  font-size: clamp(26px, 5.4vw, 44px);
+  line-height: 1.85;                    /* reserves room for furigana: no jump on reveal */
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+.hero.word-only { font-size: clamp(40px, 9vw, 72px); }
+.back .hero { font-size: clamp(22px, 4.4vw, 34px); }
+
+/* target word: bold it in the Sentence field */
+.hero b, .hero strong, .hero .target {
+  color: var(--target);
+  font-weight: 900;
+  background: linear-gradient(transparent 64%, var(--target-bg) 0);
+  padding: 0 1px;
+}
+b, strong { color: var(--target); }
+
+/* ============================================================
+   FURIGANA
+   One reading per kanji run (the script splits long ruby bases).
+   Front: hover or tap a word → that word's reading.
+          ふりがな button → every reading.
+   Back:  always shown.
+   ============================================================ */
+ruby {
+  ruby-position: over;
+  ruby-align: center;
+  -webkit-ruby-position: before;
+}
+rt {
+  font-family: var(--font-jp);
+  font-size: 0.45em;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--accent);
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+rp { display: none; }
+
+.front rt {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, visibility 0.18s ease;
+}
+
+.front .fg {
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .front .fg:hover { background-color: var(--accent-soft); }
+  .front .fg:hover rt { opacity: 1; visibility: visible; }
+  /* data-reveal="card" on .card-shell = old behaviour (hover card → all) */
+  .front[data-reveal="card"] .panel:hover rt { opacity: 1; visibility: visible; }
+}
+/* fallback if JavaScript is off: hover card → all readings */
+.front:not([data-fg]) .panel:hover rt { opacity: 1; visibility: visible; }
+.front .fg.on { background-color: var(--accent-soft); }
+.front .fg.on rt,
+.front.fg-all rt { opacity: 1; visibility: visible; }
+
+/* ============================================================
+   FRONT CONTROLS
+   ============================================================ */
+.front-foot {
+  margin-top: clamp(24px, 4vw, 36px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  justify-content: center;
+}
+.fg-toggle {
+  font: 600 13px/1 var(--font-jp);
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: color 0.18s, background-color 0.18s, border-color 0.18s;
+}
+.fg-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.fg-toggle[aria-pressed="true"] {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: transparent;
+}
+.hint {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.hint-touch { display: none; }
+@media (hover: none) {
+  .hint-mouse { display: none; }
+  .hint-touch { display: inline; }
+}
+
+/* ============================================================
+   PITCH ACCENT
+   ============================================================ */
+.pitch {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+.pitch-chip {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font: 500 13px/1.5 var(--font-ui);
+}
+
+/* ============================================================
+   BACK
+   ============================================================ */
+.headword {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.headword .jp {
+  display: inline-block;
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 600;
+  line-height: 1.9;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+}
+
+.divider {
+  border: 0;
+  height: 1px;
+  background: var(--rule);
+  margin: clamp(22px, 4vw, 32px) 0;
+}
+
+.translation {
+  font-family: var(--font-serif);
+  font-size: clamp(18px, 3vw, 21px);
+  line-height: 1.55;
+  margin: 0 0 18px;
+}
+
+.remarks {
+  font-size: 15px;
+  line-height: 1.6;
+  background: var(--accent-soft);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 0;
+}
+
+.image { margin: 24px 0 0; text-align: center; }
+.image img {
+  max-width: 100%;
+  max-height: 360px;
+  height: auto;
+  border-radius: 12px;
+}
+
+/* Audio: hidden (autoplay still works). Change to `display: block` to show replay button. */
+.audio { display: none; margin-top: 16px; text-align: center; }
+.audio .replay-button svg { width: 36px; height: 36px; }
+.audio .replay-button svg circle { fill: var(--accent-soft); stroke: none; }
+.audio .replay-button svg path { fill: var(--accent); stroke: none; }
+
+/* ============================================================
+   METADATA
+   ============================================================ */
+.metadata {
+  margin-top: 30px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-faint);
+  display: grid;
+  gap: 10px;
+}
+.meta-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+.metadata a { color: var(--ink-soft); }

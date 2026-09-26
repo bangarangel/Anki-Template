@@ -118,28 +118,36 @@ b, strong { color: var(--target); }
    Back:  always shown.
    ============================================================ */
 /* The script turns each ruby into
-     <span class="rb"><span class="rt">かんじ</span>漢字</span>
-   .rb is an inline-block; the reading is a block stacked on top. Only basic
+     <span class="jfg-rb"><span class="jfg-rt">かんじ</span>漢字</span>
+   .jfg-rb is an inline-block; the reading is a block stacked on top. Only basic
    CSS, so it renders the same in every Anki webview. The negative side
    margins let a long reading overhang instead of spreading the kanji apart.
+   Layout properties are !important so Anki or add-on CSS can't override them.
    Plain ruby/rt rules below are only the fallback if JavaScript is off. */
-.rb {
-  display: inline-block;
-  line-height: 1;
-  text-align: center;
-  text-indent: 0;
-  vertical-align: baseline;
-  white-space: nowrap;
+.jfg-rb {
+  display: inline-block !important;
+  position: static !important;
+  float: none !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  text-indent: 0 !important;
+  vertical-align: baseline !important;
+  white-space: nowrap !important;
+  transform: none !important;
 }
-.rt {
-  display: block;
-  margin: 0 -3em 0.25em;
-  white-space: nowrap;
+.jfg-rt {
+  display: block !important;
+  position: static !important;
+  float: none !important;
+  margin: 0 -3em 0.25em !important;
+  padding: 0 !important;
+  white-space: nowrap !important;
+  transform: none !important;
 }
 ruby { ruby-position: over; -webkit-ruby-position: before; }
 rp { display: none; }
 
-rt, .rt {
+rt, .jfg-rt {
   font-family: var(--font-jp);
   font-size: 0.45em;
   font-weight: 500;
@@ -153,13 +161,13 @@ rt, .rt {
   -webkit-user-select: none;
 }
 
-.front rt, .front .rt {
+.front rt, .front .jfg-rt {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.18s ease, visibility 0.18s ease;
 }
 
-.front .fg {
+.front .jfg-word {
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.18s ease;
@@ -168,16 +176,16 @@ rt, .rt {
 
 /* Not gated behind @media (hover: hover): some Anki webviews report
    "no hover" even with a mouse, which silently disabled the reveal. */
-.front .fg:hover { background-color: var(--accent-soft); }
-.front .fg:hover .rt,
+.front .jfg-word:hover { background-color: var(--accent-soft); }
+.front .jfg-word:hover .jfg-rt,
 .front ruby:hover rt { opacity: 1; visibility: visible; }
 /* data-reveal="card" on .card-shell = old behaviour (hover card → all) */
-.front[data-reveal="card"] .panel:hover .rt { opacity: 1; visibility: visible; }
+.front[data-reveal="card"] .panel:hover .jfg-rt { opacity: 1; visibility: visible; }
 /* fallback if JavaScript is off: hover card → all readings */
-.front:not([data-fg]) .panel:hover rt { opacity: 1; visibility: visible; }
-.front .fg.on { background-color: var(--accent-soft); }
-.front .fg.on .rt,
-.front.fg-all .rt { opacity: 1; visibility: visible; }
+.front:not([data-jfg]) .panel:hover rt { opacity: 1; visibility: visible; }
+.front .jfg-word.on { background-color: var(--accent-soft); }
+.front .jfg-word.on .jfg-rt,
+.front.jfg-all .jfg-rt { opacity: 1; visibility: visible; }
 
 /* ============================================================
    FRONT CONTROLS
@@ -190,7 +198,7 @@ rt, .rt {
   align-items: center;
   justify-content: center;
 }
-.fg-toggle {
+.jfg-toggle {
   font: 600 13px/1 var(--font-jp);
   letter-spacing: 0.08em;
   color: var(--ink-soft);
@@ -201,8 +209,8 @@ rt, .rt {
   cursor: pointer;
   transition: color 0.18s, background-color 0.18s, border-color 0.18s;
 }
-.fg-toggle:hover { color: var(--accent); border-color: var(--accent); }
-.fg-toggle[aria-pressed="true"] {
+.jfg-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.jfg-toggle[aria-pressed="true"] {
   color: var(--accent);
   background: var(--accent-soft);
   border-color: transparent;
@@ -213,7 +221,25 @@ rt, .rt {
   text-transform: uppercase;
   color: var(--ink-faint);
 }
+
+/* TEMPORARY diagnostics line (see front.html) */
+.jfg-debug {
+  margin: 24px 0 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--rule);
+  border-radius: 8px;
+  font: 11px/1.5 ui-monospace, Menlo, Consolas, monospace;
+  color: var(--ink-faint);
+  text-align: left;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  overflow: hidden;
+  user-select: text;
+  -webkit-user-select: text;
 }
+.jfg-debug:empty { display: none; }
 
 /* ============================================================
    PITCH ACCENT

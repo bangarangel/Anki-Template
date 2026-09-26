@@ -16,9 +16,12 @@
     {{#Pitch}}<div class="pitch">{{Pitch}}</div>{{/Pitch}}
 
     <div class="front-foot">
-      <button type="button" class="fg-toggle" aria-pressed="false">ふりがな</button>
+      <button type="button" class="jfg-toggle" aria-pressed="false">ふりがな</button>
       <span class="hint">hover or tap a word</span>
     </div>
+
+    <!-- TEMPORARY: diagnostics for the furigana layout. Delete this line when fixed. -->
+    <pre class="jfg-debug"></pre>
 
   </main>
 </div>
@@ -79,8 +82,8 @@
   }
 
   // Readings are rebuilt as plain spans instead of <ruby>/<rt>:
-  //   <span class="rb"><span class="rt">かんじ</span>漢字</span>
-  // .rb is an inline-block with the reading stacked on top as a block, so
+  //   <span class="jfg-rb"><span class="jfg-rt">かんじ</span>漢字</span>
+  // .jfg-rb is an inline-block with the reading stacked on top as a block, so
   // layout uses only basic CSS and is the same in every Anki webview
   // (native ruby, and absolute positioning, rendered wrongly in some).
   function span(cls) {
@@ -89,7 +92,7 @@
     return e;
   }
   function rubyEl(base, reading) {
-    var rb = span("rb"), rt = span("rt");
+    var rb = span("jfg-rb"), rt = span("jfg-rt");
     rt.textContent = reading;
     rb.appendChild(rt);
     rb.appendChild(document.createTextNode(base));
@@ -97,17 +100,17 @@
   }
 
   // Rubies we don't re-split (nested markup, several readings) are converted
-  // pair by pair, base + reading, and still get the .fg hover/tap hook.
+  // pair by pair, base + reading, and still get the .jfg-word hover/tap hook.
   function wrap(ruby) {
-    var g = span("fg"), cur = span("rb");
+    var g = span("jfg-word"), cur = span("jfg-rb");
     Array.prototype.slice.call(ruby.childNodes).forEach(function (n) {
       if (n.nodeName === "RP") return;
       if (n.nodeName === "RT") {
-        var rt = span("rt");
+        var rt = span("jfg-rt");
         while (n.firstChild) rt.appendChild(n.firstChild);
         cur.insertBefore(rt, cur.firstChild);
         g.appendChild(cur);
-        cur = span("rb");
+        cur = span("jfg-rb");
       } else if (n.nodeName === "RB") {
         while (n.firstChild) cur.appendChild(n.firstChild);
       } else {
@@ -146,7 +149,7 @@
     if (parts) segs = segments(chars.slice(cut).join(""));
 
     var group = document.createElement("span");
-    group.className = "fg";
+    group.className = "jfg-word";
     var frag = document.createDocumentFragment();
 
     if (parts) {
@@ -169,9 +172,12 @@
     ruby.parentNode.replaceChild(frag, ruby);
   }
 
-  var shells = document.querySelectorAll(".card-shell:not([data-fg])");
+  var shells = document.querySelectorAll(".card-shell:not([data-jfg])");
   Array.prototype.forEach.call(shells, function (shell) {
-    shell.setAttribute("data-fg", "1");
+    shell.setAttribute("data-jfg", "5");
+    var hero = shell.querySelector(".hero");
+    var heroBefore = hero ? hero.innerHTML : "";
+    var found = shell.querySelectorAll("ruby").length;
     Array.prototype.forEach.call(shell.querySelectorAll(".metadata"), function (m) {
       if (!m.textContent.trim() && !m.querySelector("img")) m.style.display = "none";
     });
@@ -181,15 +187,40 @@
 
     // Tap a word to toggle its reading (touch devices / click).
     shell.addEventListener("click", function (e) {
-      var g = e.target.closest && e.target.closest(".fg");
+      var g = e.target.closest && e.target.closest(".jfg-word");
       if (g && shell.classList.contains("front")) g.classList.toggle("on");
     });
 
+    // TEMPORARY diagnostics (front only): remove the jfg-debug div from
+    // front.html once furigana renders correctly.
+    var dbg = shell.querySelector(".jfg-debug");
+    if (dbg) {
+      var cs = function (el, props) {
+        if (!el) return "none";
+        var c = getComputedStyle(el);
+        return props.map(function (p) { return p + "=" + c.getPropertyValue(p); }).join(" ");
+      };
+      var sheets = Array.prototype.map.call(document.styleSheets, function (sh) {
+        var n = "?";
+        try { n = sh.cssRules.length; } catch (e) {}
+        return (sh.href ? sh.href.split("/").pop() : "inline") + "(" + n + ")";
+      });
+      dbg.textContent = [
+        "jfg v5 · ruby found " + found + " · converted " + shell.querySelectorAll(".jfg-rb").length +
+          " · left " + shell.querySelectorAll("ruby").length + " · " + ((navigator.userAgent.match(/Chrome\/[\d.]+/) || [""])[0]),
+        "hero: " + cs(hero, ["font-family", "font-weight", "font-size", "line-height"]),
+        "rb: " + cs(shell.querySelector(".jfg-rb"), ["display", "position", "line-height", "vertical-align"]),
+        "rt: " + cs(shell.querySelector(".jfg-rt"), ["display", "position", "font-size", "margin-bottom", "transform"]),
+        "css: " + sheets.join(" "),
+        "html: " + heroBefore.replace(/\s+/g, " ").slice(0, 300)
+      ].join("\n");
+    }
+
     // ふりがな button: reveal / hide every reading.
-    var btn = shell.querySelector(".fg-toggle");
+    var btn = shell.querySelector(".jfg-toggle");
     if (btn) btn.addEventListener("click", function (e) {
       e.stopPropagation();
-      var on = shell.classList.toggle("fg-all");
+      var on = shell.classList.toggle("jfg-all");
       btn.setAttribute("aria-pressed", on ? "true" : "false");
     });
   });

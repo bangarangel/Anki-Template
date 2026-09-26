@@ -11,3 +11,4 @@ s = re.sub(r"<script>.*</script>", lambda m: "<script>\n" + js + "</script>", s,
 open(p, "w", encoding="utf8").write(s)
 PY
 done
+python3 tools/check_css.py || exit 1

@@ -94,7 +94,7 @@
 .hero {
   font-weight: 700;
   font-size: clamp(26px, 5.4vw, 44px);
-  line-height: 1.85;                    /* reserves room for furigana: no jump on reveal */
+  line-height: 2;                       /* reserves room for furigana: no jump on reveal */
   letter-spacing: 0.02em;
   text-align: center;
 }
@@ -117,22 +117,23 @@ b, strong { color: var(--target); }
           ふりがな button → every reading.
    Back:  always shown.
    ============================================================ */
-/* The script turns each ruby into  <span class="rb">漢字<span class="rt">かんじ</span></span>
-   with the reading absolutely positioned: it never takes space in the line,
-   so it can't leave a gap or drift, whatever Anki's webview version.
+/* The script turns each ruby into
+     <span class="rb"><span class="rt">かんじ</span>漢字</span>
+   .rb is an inline-block; the reading is a block stacked on top. Only basic
+   CSS, so it renders the same in every Anki webview. The negative side
+   margins let a long reading overhang instead of spreading the kanji apart.
    Plain ruby/rt rules below are only the fallback if JavaScript is off. */
 .rb {
-  position: relative;
   display: inline-block;
   line-height: 1;
+  text-align: center;
   text-indent: 0;
+  vertical-align: baseline;
+  white-space: nowrap;
 }
 .rt {
-  position: absolute;
-  left: 50%;
-  bottom: 100%;
-  transform: translateX(-50%);
-  margin-bottom: 0.1em;
+  display: block;
+  margin: 0 -3em 0.25em;
   white-space: nowrap;
 }
 ruby { ruby-position: over; -webkit-ruby-position: before; }

@@ -52,10 +52,11 @@
     return parts;
   }
 
-  // Readings are rebuilt as plain spans instead of <ruby>/<rt>: the reading is
-  // positioned above its kanji and takes no space in the line. Native ruby
-  // layout differs between Anki's webviews (older ones left a gap after the
-  // kanji where the hidden reading sat); this renders the same everywhere.
+  // Readings are rebuilt as plain spans instead of <ruby>/<rt>:
+  //   <span class="rb"><span class="rt">かんじ</span>漢字</span>
+  // .rb is an inline-block with the reading stacked on top as a block, so
+  // layout uses only basic CSS and is the same in every Anki webview
+  // (native ruby, and absolute positioning, rendered wrongly in some).
   function span(cls) {
     var e = document.createElement("span");
     e.className = cls;
@@ -63,9 +64,9 @@
   }
   function rubyEl(base, reading) {
     var rb = span("rb"), rt = span("rt");
-    rb.appendChild(document.createTextNode(base));
     rt.textContent = reading;
     rb.appendChild(rt);
+    rb.appendChild(document.createTextNode(base));
     return rb;
   }
 
@@ -78,7 +79,7 @@
       if (n.nodeName === "RT") {
         var rt = span("rt");
         while (n.firstChild) rt.appendChild(n.firstChild);
-        cur.appendChild(rt);
+        cur.insertBefore(rt, cur.firstChild);
         g.appendChild(cur);
         cur = span("rb");
       } else if (n.nodeName === "RB") {

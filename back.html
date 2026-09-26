@@ -110,6 +110,11 @@
     Array.prototype.slice.call(ruby.childNodes).forEach(function (n) {
       if (n.nodeName === "RP") return;
       if (n.nodeName === "RT") {
+        var prev = g.lastChild;
+        if (!cur.firstChild && prev) {                              // reading without a base:
+          prev.firstChild.appendChild(document.createTextNode(n.textContent));  // join previous
+          return;
+        }
         var rt = span("jfg-rt");
         while (n.firstChild) rt.appendChild(n.firstChild);
         cur.insertBefore(rt, cur.firstChild);
@@ -126,7 +131,13 @@
   }
 
   function fix(ruby) {
+    // Drop empty readings: some notes/add-ons emit <rb>器用</rb><rt></rt><rt>きよう</rt>,
+    // which would pair 器用 with "" and leave きよう floating with no base.
+    Array.prototype.slice.call(ruby.getElementsByTagName("rt")).forEach(function (rt) {
+      if (!rt.textContent.trim()) rt.parentNode.removeChild(rt);
+    });
     var rts = ruby.getElementsByTagName("rt");
+    if (!rts.length) return ruby.parentNode.replaceChild(document.createTextNode(ruby.textContent), ruby);
     if (rts.length !== 1 ||                                         // several readings: keep as is
         ruby.querySelector("*:not(rt):not(rb):not(rp)")) return wrap(ruby);  // nested markup
     var reading = rts[0].textContent.trim();
@@ -179,9 +190,6 @@
   var shells = document.querySelectorAll(".card-shell:not([data-jfg])");
   Array.prototype.forEach.call(shells, function (shell) {
     shell.setAttribute("data-jfg", "5");
-    var hero = shell.querySelector(".hero");
-    var heroBefore = hero ? hero.innerHTML : "";
-    var found = shell.querySelectorAll("ruby").length;
     Array.prototype.forEach.call(shell.querySelectorAll(".metadata"), function (m) {
       if (!m.textContent.trim() && !m.querySelector("img")) m.style.display = "none";
     });
@@ -194,31 +202,6 @@
       var g = e.target.closest && e.target.closest(".jfg-word");
       if (g && shell.classList.contains("front")) g.classList.toggle("on");
     });
-
-    // TEMPORARY diagnostics (front only): remove the jfg-debug div from
-    // front.html once furigana renders correctly.
-    var dbg = shell.querySelector(".jfg-debug");
-    if (dbg) {
-      var cs = function (el, props) {
-        if (!el) return "none";
-        var c = getComputedStyle(el);
-        return props.map(function (p) { return p + "=" + c.getPropertyValue(p); }).join(" ");
-      };
-      var sheets = Array.prototype.map.call(document.styleSheets, function (sh) {
-        var n = "?";
-        try { n = sh.cssRules.length; } catch (e) {}
-        return (sh.href ? sh.href.split("/").pop() : "inline") + "(" + n + ")";
-      });
-      dbg.textContent = [
-        "jfg v5 · ruby found " + found + " · converted " + shell.querySelectorAll(".jfg-rb").length +
-          " · left " + shell.querySelectorAll("ruby").length + " · " + ((navigator.userAgent.match(/Chrome\/[\d.]+/) || [""])[0]),
-        "hero: " + cs(hero, ["font-family", "font-weight", "font-size", "line-height"]),
-        "rb: " + cs(shell.querySelector(".jfg-rb"), ["display", "position", "line-height", "vertical-align"]),
-        "rt: " + cs(shell.querySelector(".jfg-rt"), ["display", "position", "font-size", "margin-bottom", "transform"]),
-        "css: " + sheets.join(" "),
-        "html: " + heroBefore.replace(/\s+/g, " ").slice(0, 300)
-      ].join("\n");
-    }
 
     // ふりがな button: reveal / hide every reading.
     var btn = shell.querySelector(".jfg-toggle");

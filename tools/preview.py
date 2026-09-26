@@ -18,6 +18,8 @@ NOTES = {
     },
     "wolf": {"Word": "器用[きよう]", "Sentence": "ウルフを<b>器用[きよう]</b>に解体[かいたい]していく。", "Pitch": "",
              "Sentence Translation": "Deftly butchering the wolf."},
+    # HTML as it reached the card in the user's Anki (empty <rt> before the reading)
+    "ajt": {"Word": "器用[きよう]", "Sentence": "ウルフを<b><ruby><rb>器用</rb><rt></rt><rt>きよう</rt></ruby></b>に解体していく。"},
     "word": {"Word": "食べ物[たべもの]", "Sentence": "", "Pitch": "たべもの ￣ 0"},
 }
 

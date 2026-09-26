@@ -222,25 +222,6 @@ rt, .jfg-rt {
   color: var(--ink-faint);
 }
 
-/* TEMPORARY diagnostics line (see front.html) */
-.jfg-debug {
-  margin: 24px 0 0;
-  padding: 10px 12px;
-  border: 1px dashed var(--rule);
-  border-radius: 8px;
-  font: 11px/1.5 ui-monospace, Menlo, Consolas, monospace;
-  color: var(--ink-faint);
-  text-align: left;
-  white-space: pre-wrap;
-  word-break: break-all;
-  overflow-wrap: anywhere;
-  max-width: 100%;
-  overflow: hidden;
-  user-select: text;
-  -webkit-user-select: text;
-}
-.jfg-debug:empty { display: none; }
-
 /* ============================================================
    PITCH ACCENT
    ============================================================ */

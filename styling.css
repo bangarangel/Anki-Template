@@ -117,25 +117,42 @@ b, strong { color: var(--target); }
           ふりがな button → every reading.
    Back:  always shown.
    ============================================================ */
-ruby {
-  ruby-position: over;
-  ruby-align: center;
-  -webkit-ruby-position: before;
+/* The script turns each ruby into  <span class="rb">漢字<span class="rt">かんじ</span></span>
+   with the reading absolutely positioned: it never takes space in the line,
+   so it can't leave a gap or drift, whatever Anki's webview version.
+   Plain ruby/rt rules below are only the fallback if JavaScript is off. */
+.rb {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  text-indent: 0;
 }
-rt {
+.rt {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  margin-bottom: 0.1em;
+  white-space: nowrap;
+}
+ruby { ruby-position: over; -webkit-ruby-position: before; }
+rp { display: none; }
+
+rt, .rt {
   font-family: var(--font-jp);
   font-size: 0.45em;
   font-weight: 500;
+  font-style: normal;
   line-height: 1;
   letter-spacing: 0;
   color: var(--accent);
   text-align: center;
+  background: none;
   user-select: none;
   -webkit-user-select: none;
 }
-rp { display: none; }
 
-.front rt {
+.front rt, .front .rt {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.18s ease, visibility 0.18s ease;
@@ -150,17 +167,16 @@ rp { display: none; }
 
 /* Not gated behind @media (hover: hover): some Anki webviews report
    "no hover" even with a mouse, which silently disabled the reveal. */
-.front .fg:hover,
-.front ruby:hover { background-color: var(--accent-soft); }
-.front .fg:hover rt,
+.front .fg:hover { background-color: var(--accent-soft); }
+.front .fg:hover .rt,
 .front ruby:hover rt { opacity: 1; visibility: visible; }
 /* data-reveal="card" on .card-shell = old behaviour (hover card → all) */
-.front[data-reveal="card"] .panel:hover rt { opacity: 1; visibility: visible; }
+.front[data-reveal="card"] .panel:hover .rt { opacity: 1; visibility: visible; }
 /* fallback if JavaScript is off: hover card → all readings */
 .front:not([data-fg]) .panel:hover rt { opacity: 1; visibility: visible; }
 .front .fg.on { background-color: var(--accent-soft); }
-.front .fg.on rt,
-.front.fg-all rt { opacity: 1; visibility: visible; }
+.front .fg.on .rt,
+.front.fg-all .rt { opacity: 1; visibility: visible; }
 
 /* ============================================================
    FRONT CONTROLS

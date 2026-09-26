@@ -78,21 +78,43 @@
     return parts;
   }
 
+  // Readings are rebuilt as plain spans instead of <ruby>/<rt>: the reading is
+  // positioned above its kanji and takes no space in the line. Native ruby
+  // layout differs between Anki's webviews (older ones left a gap after the
+  // kanji where the hidden reading sat); this renders the same everywhere.
+  function span(cls) {
+    var e = document.createElement("span");
+    e.className = cls;
+    return e;
+  }
   function rubyEl(base, reading) {
-    var r = document.createElement("ruby");
-    r.appendChild(document.createTextNode(base));
-    var rt = document.createElement("rt");
+    var rb = span("rb"), rt = span("rt");
+    rb.appendChild(document.createTextNode(base));
     rt.textContent = reading;
-    r.appendChild(rt);
-    return r;
+    rb.appendChild(rt);
+    return rb;
   }
 
-  // Rubies we don't re-split still get the .fg hover/tap hook.
+  // Rubies we don't re-split (nested markup, several readings) are converted
+  // pair by pair, base + reading, and still get the .fg hover/tap hook.
   function wrap(ruby) {
-    var g = document.createElement("span");
-    g.className = "fg";
+    var g = span("fg"), cur = span("rb");
+    Array.prototype.slice.call(ruby.childNodes).forEach(function (n) {
+      if (n.nodeName === "RP") return;
+      if (n.nodeName === "RT") {
+        var rt = span("rt");
+        while (n.firstChild) rt.appendChild(n.firstChild);
+        cur.appendChild(rt);
+        g.appendChild(cur);
+        cur = span("rb");
+      } else if (n.nodeName === "RB") {
+        while (n.firstChild) cur.appendChild(n.firstChild);
+      } else {
+        cur.appendChild(n);
+      }
+    });
+    if (cur.firstChild) g.appendChild(cur);
     ruby.parentNode.replaceChild(g, ruby);
-    g.appendChild(ruby);
   }
 
   function fix(ruby) {

@@ -16,6 +16,8 @@ NOTES = {
         "References": "",
         "Audio": "",
     },
+    "wolf": {"Word": "器用[きよう]", "Sentence": "ウルフを<b>器用[きよう]</b>に解体[かいたい]していく。", "Pitch": "",
+             "Sentence Translation": "Deftly butchering the wolf."},
     "word": {"Word": "食べ物[たべもの]", "Sentence": "", "Pitch": "たべもの ￣ 0"},
 }
 

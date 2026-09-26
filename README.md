@@ -45,6 +45,9 @@ If your `Sentence` field already holds `<ruby>` HTML, change
 those rubies too.
 
 ## Other notes
+- Pitch accent is shown on the back only, under the headword. The Japanese
+  Pitch Accent add-on writes the reading into that field, so on the front it
+  would give the answer away. Each entry shows as a chip.
 - Bold the target word in `Sentence` to highlight it in coral.
 - Audio is hidden but still autoplays. To show the replay button, set
   `.audio { display: block; }` in `styling.css`.

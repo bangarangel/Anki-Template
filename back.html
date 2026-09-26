@@ -3,9 +3,12 @@
 
     {{#Word}}
       <header class="headword">
-        <span class="jp" lang="ja">{{furigana:Word}}</span>{{#Pitch}}<span class="pitch-chip">{{Pitch}}</span>{{/Pitch}}
+        <span class="jp" lang="ja">{{furigana:Word}}</span>
       </header>
     {{/Word}}
+
+    <!-- Pitch is back-only: the Japanese Pitch Accent add-on writes the reading into it. -->
+    {{#Pitch}}<div class="pitch" lang="ja">{{Pitch}}</div>{{/Pitch}}
 
     {{#Sentence}}
       <!-- Same toggle as the front: {{furigana:Sentence}} or {{Sentence}}. -->

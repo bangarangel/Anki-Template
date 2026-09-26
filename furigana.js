@@ -61,10 +61,18 @@
     return r;
   }
 
+  // Rubies we don't re-split still get the .fg hover/tap hook.
+  function wrap(ruby) {
+    var g = document.createElement("span");
+    g.className = "fg";
+    ruby.parentNode.replaceChild(g, ruby);
+    g.appendChild(ruby);
+  }
+
   function fix(ruby) {
     var rts = ruby.getElementsByTagName("rt");
-    if (rts.length !== 1) return;                                   // complex ruby: leave alone
-    if (ruby.querySelector("*:not(rt):not(rb):not(rp)")) return;    // nested markup: leave alone
+    if (rts.length !== 1 ||                                         // several readings: keep as is
+        ruby.querySelector("*:not(rt):not(rb):not(rp)")) return wrap(ruby);  // nested markup
     var reading = rts[0].textContent.trim();
     var base = "";
     for (var n = ruby.firstChild; n; n = n.nextSibling) {
@@ -72,7 +80,7 @@
     }
     base = base.trim();
     var segs = segments(base);
-    if (!reading || !segs.some(function (s) { return s.k; })) return;
+    if (!reading || !segs.some(function (s) { return s.k; })) return wrap(ruby);
 
     // Try the whole base, then drop leading text until the reading fits.
     // A suffix may start at a kanji run or at an honorific お/ご
@@ -118,7 +126,9 @@
     Array.prototype.forEach.call(shell.querySelectorAll(".metadata"), function (m) {
       if (!m.textContent.trim() && !m.querySelector("img")) m.style.display = "none";
     });
-    Array.prototype.slice.call(shell.querySelectorAll("ruby")).forEach(fix);
+    Array.prototype.slice.call(shell.querySelectorAll("ruby")).forEach(function (r) {
+      try { fix(r); } catch (e) { if (r.parentNode) wrap(r); }       // one bad ruby never breaks the card
+    });
 
     // Tap a word to toggle its reading (touch devices / click).
     shell.addEventListener("click", function (e) {

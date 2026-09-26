@@ -36,6 +36,10 @@ whole of 今日は良い天気. The `<script>` at the bottom of both templates
 belongs to 駅前 and not to 昨日駅前. Put a space before the word in the
 field: `昨日 駅前[えきまえ]`. (The space doesn't show on the card.)
 
+**No furigana at all, even with the button:** check for a space between the
+kanji and the bracket. `器用 [きよう]` is plain text to Anki. It must be
+`器用[きよう]`. A space *before* the word (`を 器用[きよう]`) is fine.
+
 If your `Sentence` field already holds `<ruby>` HTML, change
 `{{furigana:Sentence}}` to `{{Sentence}}` in both templates. The script fixes
 those rubies too.

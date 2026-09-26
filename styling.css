@@ -148,12 +148,14 @@ rp { display: none; }
   -webkit-tap-highlight-color: transparent;
 }
 
-@media (hover: hover) {
-  .front .fg:hover { background-color: var(--accent-soft); }
-  .front .fg:hover rt { opacity: 1; visibility: visible; }
-  /* data-reveal="card" on .card-shell = old behaviour (hover card → all) */
-  .front[data-reveal="card"] .panel:hover rt { opacity: 1; visibility: visible; }
-}
+/* Not gated behind @media (hover: hover): some Anki webviews report
+   "no hover" even with a mouse, which silently disabled the reveal. */
+.front .fg:hover,
+.front ruby:hover { background-color: var(--accent-soft); }
+.front .fg:hover rt,
+.front ruby:hover rt { opacity: 1; visibility: visible; }
+/* data-reveal="card" on .card-shell = old behaviour (hover card → all) */
+.front[data-reveal="card"] .panel:hover rt { opacity: 1; visibility: visible; }
 /* fallback if JavaScript is off: hover card → all readings */
 .front:not([data-fg]) .panel:hover rt { opacity: 1; visibility: visible; }
 .front .fg.on { background-color: var(--accent-soft); }
@@ -194,10 +196,6 @@ rp { display: none; }
   text-transform: uppercase;
   color: var(--ink-faint);
 }
-.hint-touch { display: none; }
-@media (hover: none) {
-  .hint-mouse { display: none; }
-  .hint-touch { display: inline; }
 }
 
 /* ============================================================
